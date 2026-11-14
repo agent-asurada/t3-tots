@@ -6,7 +6,13 @@ description: >-
   Use on the first chat, when no T3 Tots setup is saved in memory, or when the
   user says "set up T3 Tots" / "getting started" / "reinstall the tools".
 ---
-If you are not Grok Bot, stop here. Install and verify the tools by following AGENTS.md in this release, and skip every step below (box, ListMachines, routines, cards, memory, phone setup; t3-tots-rules "Grok Bot only" lists what to do instead).
+OpenBot path: use `t3-openbot` as the setup entry point. Work on the current
+computer only. Do not run the legacy box, ListMachines, UpdateAvatar, or
+cross-computer steps below; those belong to the old hosted integration. Install
+the skills with `node tools/t3ctl skills install --to ~/.agents/skills` after
+the user's yes, and use `node t3ctl`/`python3 t3q.py` from the local tools
+folder for checks. Use OpenBot's own routines, cards, memory, and file
+attachment tools for the corresponding features.
 
 Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Detection is read-only. Nothing is written to the user's computers until they say yes, and the token needs its own yes.
 
@@ -25,7 +31,7 @@ The file must be a PNG under 5 MB whose sha256 is `ae44bdac0842f21d74b7cc93975af
 
 ## 1. Detect (no questions yet)
 1. **Box tools and full skills** (box and the user's own skill library only, no yes needed, nothing touches the user's computers): save the fetcher from t3-install-tools "Box copy" to `/workspace/t3tots_fetch.py` whenever that file is missing or differs from it, also when the box tools are already there. An older fetcher can't see template placeholders. If `/workspace/t3-tots-tools/manifest.json` is missing, run "Box copy" now. Then do the checks under t3-install-tools "After an update" right away, before any question: on a bot made from the template this saves the full copy of every t3-* skill, with no computer connected and no setup yes. If it fails (no network, `HASH_MISMATCH`, or `REPO_PRIVATE_OR_MISSING`), say so in the report and use t3-install-tools "Private repo" later. The read-only probe still runs.
-2. **Computers:** ListMachines. Use desktops only (phones can't run the tools). If none is registered or connected, say: "Install the Grok Bot desktop app on the computer that runs T3 Code, sign in, and tell me when it shows up," then stop.
+2. **Computers:** ListMachines. Use desktops only (phones can't run the tools). If none is registered or connected, say: "Install the OpenBot desktop app on the computer that runs T3 Code, sign in, and tell me when it shows up," then stop.
 3. **Each connected desktop, in parallel**, run the read-only probe for its OS. It never opens token or secret files, and its file list leaves out `token`, `listen.json` and logs. If memory already names a tools folder, add it to the probe's folder list.
    macOS / Linux (zsh-safe):
    ```
@@ -70,11 +76,11 @@ Don't ask anything else. Name, timezone and projects folder use the defaults unl
 4. **Full skills and bot-side checks, second pass** (box and skill library only, no extra yes: these are the user's own T3 Tots skills): do every check under t3-install-tools "After an update" again, in case section 1 couldn't (no network then). No skill may be left a placeholder, so none is downloaded from GitHub during normal use. Save the note "T3 Tots bot-side checks done for <tag>". If anything was saved in either pass, say it in one line ("Saved my full skills").
 5. **Official face:** already handled before section 1. If this run already tried or skipped it, do nothing. Do not download the avatar or call UpdateAvatar again.
 6. Save one memory note: setup done, tools version, per computer (label, OS, tools folder, Python command such as `py -3`, Node version, token yes/no and expiry date), whether the official face was set, projects folder, sandbox project, protected jobs, that phone answers are off, and that decisions are in the default mode (t3-tots-rules "Decisions"). The oversight mode and pstack status are saved in section 4, and routines separately in section 6.
-7. macOS only, optional: the `t3ui` UI fallback needs Accessibility permission for the Grok Bot app (System Settings > Privacy & Security > Accessibility). Mention it once; don't ask now.
+7. macOS only, optional: the `t3ui` UI fallback needs Accessibility permission for the OpenBot app (System Settings > Privacy & Security > Accessibility). Mention it once; don't ask now.
 
 ## 4. Oversight mode and pstack
 1. **Oversight mode:** ask once, as a tap-to-answer card: "How hands-on should I be: Monitor, Orchestrate, or PM coworker?" Explain in one line each. Monitor: I relay questions, handle approvals per your saved autonomy, report finishes, and step in only if a thread is truly stuck or broken. Orchestrate: Monitor plus starting watches and routines and coordinating several threads when you ask, without interrupting healthy runs. PM coworker: I actively plan and drive project work with you (including project-manager threads), and still never merge or take irreversible actions without your OK. In every mode, never steer a thread that is running or already knows its next step. Save the pick to memory.
-2. **pstack (required):** pstack, the principles pack by Lauren Tan (poteto), sets this bot's quality bar and is a required install. Ask: "pstack (Lauren Tan's poteto principles) is required for the quality bar this bot works to. Set it up now?" If yes, on Grok Bot find it with SearchPlugins ("pstack") and give the user the add link of Cursor's own pstack listing, not the one described as a port for Claude Code and Codex; skip this if pstack is already installed. In Cursor it is `/add-plugin pstack`. For other agents, a community mirror is `npx skills add backnotprop/pstack`. That mirror is not her official repo. Her work is the Cursor poteto/pstack principles plugin. If no, say quality checks will be lighter and the bot won't work as intended until it is installed, and offer it again in the finish message. Save the answer to memory.
+2. **pstack (required):** pstack, the principles pack by Lauren Tan (poteto), sets this bot's quality bar and is a required install. Ask: "pstack (Lauren Tan's poteto principles) is required for the quality bar this bot works to. Set it up now?" If yes, on OpenBot find it with SearchPlugins ("pstack") and give the user the add link of Cursor's own pstack listing, not the one described as a port for Claude Code and Codex; skip this if pstack is already installed. In Cursor it is `/add-plugin pstack`. For other agents, a community mirror is `npx skills add backnotprop/pstack`. That mirror is not her official repo. Her work is the Cursor poteto/pstack principles plugin. If no, say quality checks will be lighter and the bot won't work as intended until it is installed, and offer it again in the finish message. Save the answer to memory.
 
 ## 5. Optional: answer from your phone
 Only if a token was issued. Offer it once, in one line: "Want me to message you here the moment a thread asks you something, so you can answer from this chat on your phone or computer? It needs a small listener on each computer and a webhook routine; say **phone answers** to set it up." On yes, follow t3-phone-answers "Setup": you open a setup window on each computer yourself, and the user only pastes two lines (the Webhook URL, then the Authorization header). On no, don't ask again.

@@ -1,6 +1,6 @@
 # T3 Tots
 
-Grok Bot / chat companion for [T3 Code](https://github.com/pingdotgg/t3code), with skills and helper tools. Thread status, waiting items, new threads, answers, reports, watches, and updates.
+OpenBot and other Agent companions for [T3 Code](https://github.com/pingdotgg/t3code), with skills and helper tools. Thread status, waiting items, new threads, answers, reports, watches, and updates.
 
 T3 Tots is unofficial. `t3ctl` and `t3listen` use T3 Code's internal local websocket API, which isn't public or stable, and `t3q.py` reads its database read-only. A T3 Code update can break them. T3 Code now has an official [MCP server for outside agents](https://github.com/pingdotgg/t3code/blob/main/docs/user/outside-agents.md) and a `t3 thread` command. They don't cover everything T3 Tots does yet, such as permission approvals, live events to a webhook, resuming a stuck queue and usage-limit recovery. T3 Tots moves features onto the official interfaces as they gain coverage.
 
@@ -12,7 +12,7 @@ Start with [t3-getting-started](skills/t3-getting-started/SKILL.md). Install and
 
 | Path | What it is |
 |---|---|
-| `skills/` | One folder per skill. |
+| `skills/` | One folder per skill, including the OpenBot adapter `t3-openbot`. |
 | `tools/` | Scripts, installed flat into one folder per computer. |
 | `manifest.json` | Version, dest path, size, SHA-256, and which OS gets each file. |
 | `scripts/`, `tests/` | Checks, manifest builder, skill sync. |
@@ -23,6 +23,7 @@ Start with [t3-getting-started](skills/t3-getting-started/SKILL.md). Install and
 | `t3q.py` | all | Read-only T3 DB queries. No token. |
 | `t3ctl` | all | Local API client and `skills` installer. `node t3ctl` prints usage. |
 | `t3listen` | all | Optional. Pushes questions and run ends to your webhook. |
+| `skills/t3-openbot/openbot-adapter.js` | OpenBot | Converts redacted `t3listen` JSON events to OpenBot actions. |
 | `thread-match.js` | all | Shared thread lookup used by `t3ctl` and `t3listen`. Not run on its own. |
 | `export.js`, `survey.js` | all | Redacted export and activity survey. |
 | `t3ui` + `ui-*.applescript` | macOS | UI fallback if the local API is down (needs Accessibility). |
@@ -33,6 +34,10 @@ Start with [t3-getting-started](skills/t3-getting-started/SKILL.md). Install and
 ## Install
 
 Install from a release tag, not from `main`. Every file is checked against that tag's `manifest.json` before it is used.
+
+**OpenBot.** Install the skills into the OpenBot/Codex skills directory, then use `t3-openbot` as the integration entry point. It maps T3 questions and approvals to OpenBot's chat prompts and confirmation cards, and maps watches to OpenBot routines.
+
+For a process bridge, pipe one redacted event per line through `node ~/.agents/skills/t3-openbot/openbot-adapter.js`. The adapter emits one OpenBot action per line and performs no network access or credential handling.
 
 **Grok Bot.** Skills are built in. Say "set up T3 Tots". After your yes it installs the tools on each computer. The template card starts as a geometric mark. On first setup the official face from [`assets/avatar.png`](assets/avatar.png) is set at the opening, before install, when that download works.
 
@@ -58,7 +63,7 @@ Windows: `gh release download -R Deepusleepy/t3-tots --archive zip`, expand, the
 
 Skill folders: Claude Code `~/.claude/skills`, Codex `~/.agents/skills`, Cursor `~/.cursor/skills`, Hermes `~/.hermes/skills` (same paths under `%USERPROFILE%` on Windows). Install into one folder only. Cursor also loads the other three, so a second copy is listed twice.
 
-Then ask the agent to set up T3 Tots. It follows [AGENTS.md](AGENTS.md) (hash-check against `manifest.json`. Grok Bot-only steps: `t3-tots-rules` "Grok Bot only"). Updates use the same commands. Edited skills are kept unless you pass `--force` (the old copy goes to `out/skills-backup/<timestamp>/`).
+Then ask the agent to set up T3 Tots. It follows [AGENTS.md](AGENTS.md) and installs the `t3-openbot` adapter with the other skills. Updates use the same commands. Edited skills are kept unless you pass `--force` (the old copy goes to `out/skills-backup/<timestamp>/`).
 
 ## Phone answers (optional)
 

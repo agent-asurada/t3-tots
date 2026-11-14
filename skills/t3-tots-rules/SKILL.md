@@ -47,7 +47,7 @@ Never delete threads, and never change T3 settings. Archive or unarchive only a 
 ## Decisions
 This section is the one source for who decides; other skills and AGENTS.md point here. A thread asks for two kinds of decision. A question (`user_input`) asks what to build. An approval asks permission to run a command or change files. Who decides depends on the mode the user set, which is saved in memory:
 
-1. Default mode: show questions to the user as cards (or numbered options; see "Grok Bot only") and answer only with their exact pick for that question (t3-phone-answers "Answering"). Summarise approvals and leave them for the app, unless the user says yes to that request in chat. Offer thread actions such as `resume-at-reset`; don't run them.
+1. Default mode: show questions to the user with OpenBot's `ask_user` or `ask_ui` tools and answer only with their exact pick for that question (t3-phone-answers "Answering"). Summarise approvals and leave them for the app, unless the user says yes to that request in chat. Offer thread actions such as `resume-at-reset`; don't run them.
 2. Delegated mode starts when the user says something like "decide for me", "do whatever you need" or "I'm away, keep it moving". Record the scope and the end condition in memory. In this mode:
    - Answer routine questions yourself and tell the user afterwards what you picked and why.
    - Never accept an approval yourself. A thread asks for one only when a safety check flagged the command (for example a git hook on `git reset --hard`), even in full access. Decline it with `t3ctl answer --thread <t> --request <id> --decision decline --redirect`. That also tells the thread not to retry or work around it, to use a safer way or skip that step, and to carry on. Log it, and list every declined approval with its reason in your report.
@@ -74,21 +74,27 @@ Never invent the user's preferences. The thread decides how to do the work. The 
 ## Finding a thread
 Many skills start from words the user typed. Run `T3_Q='<words>' python3 t3q.py thread` on every computer and take the best score overall. `T3_Q` also takes a thread id or an id prefix of 8 or more characters. Threads that agents spawned match only with `T3_ALL=1`. t3q.py exits 1 with `AMBIGUOUS` when the top two are within 0.1 and with `NO_GOOD_MATCH` when the best is under 0.6; list the closest ones it prints and ask. If you act on the best and another match scored 0.6 or more, name it in one line so the user can correct you. If `worktreePath` is empty and the messages name another working folder, use that folder and say which one. A thread lives on one computer: search all, act only on the owner. With a token, `t3ctl search --query '<words>'` also finds a thread by content. `t3ctl --thread` takes a full id, an id prefix of 8 or more characters, an exact title, or words found in exactly one title. More than one match exits 1 with `AMBIGUOUS` and the candidates, so pass the full id.
 
-## Grok Bot only
-These steps need tools only Grok Bot has. A skill that uses them points here in one line. Any other agent (Claude Code, Codex, Cursor and so on) runs on one computer and does this instead:
+## OpenBot platform
 
-| Grok Bot step | Other agents |
-|---|---|
-| ListMachines, every connected computer | Only the computer you run on |
-| The box (`/workspace`, `/workspace/t3-tots-tools`, its `google-chrome`), CopyToBox, CopyFromBox | Run the same script from the tools folder and write to `<tools folder>/out/` (report helpers need local Python 3.9+; skip screenshots) |
-| SendToUser | Give the file path |
-| Routines (scheduled or webhook) and watches | Run the check once when asked; schedule it only with the user's own tools if they ask |
-| Tap-to-answer cards | Ask in plain text with numbered options; answers still follow "Decisions" |
-| Memory | Ask, or use the notes file the user names |
-| Phone answers (`t3listen` to a chat webhook) | Skip unless the user gives their own webhook |
+OpenBot is the primary host for these skills. Use `t3-openbot` as the entry
+point and OpenBot's own tools for questions, approval cards, secure
+credentials, file attachments, memory, and scheduled routines. `t3ctl` remains
+the only writer to T3 state, and `t3q.py` remains read-only.
+
+OpenBot runs on the current computer by default. Run a check once when asked;
+create a routine only when the user asks for ongoing monitoring. Use
+`openbot.attach_files_to_response` for generated files, `openbot.ask_user` for
+questions, `openbot.ask_ui` for approvals, and `openbot.request_api_key` or the
+Vault flow for credentials. Never assume a routine, memory entry, connected
+computer list, or webhook exists.
+
+Legacy Grok integrations may still use their own platform tools, but they are
+not required for OpenBot.
 
 ## Computers
-Grok Bot only (see "Grok Bot only"). Call ListMachines every run. Never hard-code machine ids or home paths. The default scope is every connected computer with T3 data, run in parallel and labelled by name. Narrow it only when the user names one ("mac only"). To create things, use the computer the user names, else the one their message came from. Say which computers were offline, once per outage, then check quietly until each is back. Keep a Mac awake (`caffeinate -dimsu -w <pid>` tied to the job, or ask the user to change the setting) when a watch or delegated run must last overnight.
+OpenBot uses the current computer unless the user names another available
+agent. Do not hard-code machine ids or home paths. If a task needs another
+computer and no agent is connected for it, report that as a blocker.
 
 ## Shells
 macOS zsh: wrap commands in a function, `f(){ ...; }; f`, and use quoted heredocs. Windows: PowerShell. Linux: bash. Examples in skills are POSIX. On Windows, translate them:
@@ -157,7 +163,7 @@ Optional. It needs the token and `listen.json`. It follows T3's live events and 
 - `export.js` writes a redacted JSON export for reports. Options work like t3ctl (`--project Foo` or `--project=Foo`; an unknown option is `USAGE`). `--project` is a filter: an exact id, else a folder, else an exact title (case ignored) picks that project, and two exact matches stop with `AMBIGUOUS` listing them; otherwise every project whose title contains the words is exported, and it prints a note naming them. No `--project` means all. `survey.js` lists activity and stale threads.
 - `t3ui` and `ui-*.applescript` are a macOS-only UI fallback. They use the running T3 Code app, or `T3_APP`.
 - Data files the skills create in the tools folder: `templates.md`, `trackers/`, `update-prefs.json`, `sync-prefs.json`, `sync-backups/`, `out/`, `README.md`, `watch-state.json`, `watch-<name>.json`, `autoresume.json`. `t3ctl new` writes `started-here.json`. t3listen writes `listen.json` (private), `listen-state.json`, `answered-here.json` and `listen.log`.
-- Don't leave scratch files (CSVs, `.bak` copies, screenshots) in the tools folder. Put scratch files in `out/`. On Grok Bot, pages are built on the box (`/workspace`).
+- Don't leave scratch files (CSVs, `.bak` copies, screenshots) in the tools folder. Put scratch files in `out/`. On OpenBot, pages are built on the box (`/workspace`).
 
 ### Master copy
 The reference copy lives on the box at `/workspace/t3-tots-tools/`, installed and sha256-verified by t3-install-tools. Its `manifest.json` is the reference for every computer. Skill folders don't carry their own copies of the scripts. If the master copy is missing, run t3-install-tools "Box copy". If a computer lacks a script or a hash differs from `manifest.json`, say so and offer to reinstall.
@@ -226,4 +232,4 @@ Digests, the recurring cleanup scan, stale-thread lists, watches and phone answe
 - Send one message per event. If a watch and t3listen both report the same finish, say it once.
 - Send files with SendToUser rather than pasting them. Pass `box_path` to CopyToBox when the file must land somewhere other than uploads.
 - Don't present the user's own rules back to them as blockers. Follow the rule and say what you did.
-- Grok Bot: when you start a cloud agent, leave fast mode off.
+- OpenBot: when you start a cloud agent, leave fast mode off.

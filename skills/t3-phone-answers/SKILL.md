@@ -8,7 +8,12 @@ description: >-
   phone answers routine", and pausing or removing it. A run of the routine itself
   uses t3-event, not this skill.
 ---
-Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, ListMachines, routines, cards or SendToUser are Grok Bot only; other agents follow t3-tots-rules "Grok Bot only". Its "Decisions" section says who may answer. Phone answers need the token (t3-tots-rules "Token") and tools v1.4.0 or later (t3-install-tools).
+Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, ListMachines, routines, cards or SendToUser are OpenBot integration; other agents follow t3-tots-rules "OpenBot integration". Its "Decisions" section says who may answer. Phone answers need the token (t3-tots-rules "Token") and tools v1.4.0 or later (t3-install-tools).
+
+On OpenBot, create or update the webhook routine with OpenBot's routine tools.
+Do not ask the user to paste a webhook key into chat. Keep `t3listen` as the
+local event producer and connect its URL and Authorization header through the
+routine's secure configuration.
 
 ## How it works
 `t3listen` runs on each computer, follows T3's live event stream (no polling) and POSTs JSON to the routine's webhook:

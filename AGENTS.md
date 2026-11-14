@@ -1,6 +1,6 @@
 # AGENTS.md: installing and verifying T3 Tots
 
-Non-Grok agents follow this file to install and verify. For Grok Bot only steps, do what `skills/t3-tots-rules/SKILL.md` "Grok Bot only" says instead. The skills are in `skills/`; follow `skills/t3-tots-rules/SKILL.md` throughout.
+OpenBot and other non-Grok agents follow this file to install and verify. OpenBot uses `skills/t3-openbot/SKILL.md` as its integration entry point. For Grok Bot only steps, do what `skills/t3-tots-rules/SKILL.md` "Grok Bot only" says instead. The skills are in `skills/`; follow `skills/t3-tots-rules/SKILL.md` throughout.
 
 ## Rules
 - Install only after the user's yes. Never print, copy or overwrite the `token` file or `listen.json` (it holds the user's webhook URL and key), and never open T3 Code's `secrets/` or any auth, token or credential file.
