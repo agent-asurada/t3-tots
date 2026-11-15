@@ -291,15 +291,15 @@
    "path": "skills/t3-openbot/SKILL.md",
    "dest": "t3-openbot/SKILL.md",
    "kind": "skill",
-   "bytes": 2417,
-   "sha256": "915080303a99f3cd178bd169358f56ed427837c26f963a411a087bad4e1d7d70"
+   "bytes": 2625,
+   "sha256": "eef7c90d9fd2e7a659318ff39120efdf490322efcfa5f29e7bfad2af848ed0d2"
   },
   {
    "path": "skills/t3-openbot/openbot-adapter.js",
    "dest": "t3-openbot/openbot-adapter.js",
    "kind": "skill",
-   "bytes": 2648,
-   "sha256": "e4311671ea746d373942c6dad94329ad595f2032baf3f0328fcb24c7c849fce9"
+   "bytes": 4925,
+   "sha256": "73cded1f0c3bc88ecfafcc982a459510adc8981e9a64d217abbd87491133b32f"
   },
   {
    "path": "skills/t3-phone-answers/SKILL.md",

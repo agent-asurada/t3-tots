@@ -61,6 +61,42 @@ function adapt(event) {
   return { ...base, action: "unknown", text: event.text || null };
 }
 
+function adaptRoute(route, payload = {}) {
+  const r = String(route || "");
+  const arg = (name) => payload[name] == null ? null : String(payload[name]);
+  const command = ["node", "t3ctl"];
+  if (r === "t3_project_list") command.push("projects");
+  else if (r === "t3_thread_list") {
+    command.push("threads");
+    if (arg("project")) command.push("--project", arg("project"));
+    if (arg("limit")) command.push("--limit", arg("limit"));
+  } else if (r === "t3_thread_read") {
+    if (!arg("thread")) return { source: "t3-tots", action: "invalid-route", route: r, error: "thread is required" };
+    command.push("read", "--thread", arg("thread"));
+    if (arg("last")) command.push("--last", arg("last"));
+  } else if (r === "t3_pending_request") {
+    if (!arg("thread")) return { source: "t3-tots", action: "invalid-route", route: r, error: "thread is required" };
+    command.push("pending", "--thread", arg("thread"), "--json");
+  } else if (r === "t3_thread_launch") {
+    if (!arg("project") || !arg("prompt")) return { source: "t3-tots", action: "invalid-route", route: r, error: "project and prompt are required" };
+    command.push("new", "--project", arg("project"), "--prompt", arg("prompt"));
+    if (arg("title")) command.push("--title", arg("title"));
+  } else if (r === "t3_thread_send") {
+    if (!arg("thread") || !arg("prompt")) return { source: "t3-tots", action: "invalid-route", route: r, error: "thread and prompt are required" };
+    command.push("send", "--thread", arg("thread"), "--prompt", arg("prompt"));
+  } else if (r === "t3_thread_update") {
+    const action = arg("action");
+    if (!arg("thread") || !["archive", "unarchive", "settle", "unsettle", "rename"].includes(action))
+      return { source: "t3-tots", action: "invalid-route", route: r, error: "thread and a supported action are required" };
+    command.push(action, "--thread", arg("thread"));
+    if (action === "rename") {
+      if (!arg("title")) return { source: "t3-tots", action: "invalid-route", route: r, error: "title is required for rename" };
+      command.push("--title", arg("title"));
+    }
+  } else return { source: "t3-tots", action: "unsupported-route", route: r };
+  return { source: "t3-tots", action: "local-command", route: r, argv: command };
+}
+
 function main(input = process.stdin, output = process.stdout) {
   const rl = readline.createInterface({ input, crlfDelay: Infinity });
   rl.on("line", (line) => {
@@ -71,4 +107,4 @@ function main(input = process.stdin, output = process.stdout) {
 }
 
 if (require.main === module) main();
-module.exports = { adapt };
+module.exports = { adapt, adaptRoute };

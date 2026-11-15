@@ -14,6 +14,9 @@ and OpenBot's user-facing actions separate:
 - Use `node t3listen` only when the user explicitly asks for a webhook listener
   or phone-style notifications. OpenBot scheduling and webhook routines use
   OpenBot's own routine tools.
+- When an upstream T3 MCP route is present, pass it through
+  `openbot-adapter.js` first. It emits an allowlisted `t3ctl` argv array;
+  OpenBot decides whether to run it and still applies its approval rules.
 
 ## OpenBot mappings
 

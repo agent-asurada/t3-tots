@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { adapt } = require("../skills/t3-openbot/openbot-adapter");
+const { adapt, adaptRoute } = require("../skills/t3-openbot/openbot-adapter");
 
 test("question requests become OpenBot questions", () => {
   const out = adapt({ event: "request.opened", eventId: "e1", threadId: "t1", request: { id: "r1", prompt: "Pick one", options: ["A", "B"] } });
@@ -21,4 +21,18 @@ test("unknown events remain visible without forwarding arbitrary fields", () => 
   const out = adapt({ event: "other", text: "data", secret: "drop" });
   assert.deepEqual(out, { source: "t3-tots", event: "other", eventId: null, machine: null, threadId: null, title: null, action: "unknown", text: "data" });
   assert.equal("secret" in out, false);
+});
+
+test("MCP routes become allowlisted t3ctl argv", () => {
+  assert.deepEqual(adaptRoute("t3_thread_send", { thread: "t1", prompt: "Continue" }), {
+    source: "t3-tots", action: "local-command", route: "t3_thread_send",
+    argv: ["node", "t3ctl", "send", "--thread", "t1", "--prompt", "Continue"],
+  });
+  assert.equal(adaptRoute("t3_thread_update", { thread: "t1", action: "rename", title: "New" }).argv.at(-1), "New");
+});
+
+test("unsupported or incomplete MCP routes do not produce commands", () => {
+  assert.equal(adaptRoute("t3_unknown", {}).action, "unsupported-route");
+  assert.equal(adaptRoute("t3_thread_send", { thread: "t1" }).action, "invalid-route");
+  assert.equal(adaptRoute("t3_thread_update", { thread: "t1", action: "delete" }).action, "invalid-route");
 });
