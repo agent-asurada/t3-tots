@@ -4,7 +4,9 @@ description: >-
   Settle, unsettle, archive, unarchive, rename, stop, snooze, fork, switch model or search T3 threads,
   manage a thread's queue, or resume one after a usage limit. Use for "settle
   <thread>", "archive <thread>", "rename <thread>", "stop <thread>", "snooze <thread>", "resume after
-  the limit". For "what is <thread> asking", use t3-waiting.
+  the limit". For "what is <thread> asking", use t3-waiting. With a "T3 routes v2"
+  note, a plain settle, unsettle, rename, stop, pin or snooze goes straight through the T3
+  connector, without this skill, unless t3-routes sent you here after the connector failed.
 ---
 Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Find the thread with its "Finding a thread" section, then do only the action asked, on that thread.
 

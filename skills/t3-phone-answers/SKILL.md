@@ -1,14 +1,15 @@
 ---
 name: t3-phone-answers
 description: >-
-  Answer T3 Code thread questions from this chat (e.g. on the phone): set up the
-  t3listen listener and the "T3 questions to chat" webhook routine, show each new
-  question as tap-to-answer options, and answer it in T3 as t3-tots-rules "Decisions" allows.
-  Use for "phone answers", "tell me when a thread asks something", "update the
-  phone answers routine", and pausing or removing it. A run of the routine itself
-  uses t3-event, not this skill.
+  Set up, change or remove phone answers: the t3listen listener and the "T3 questions to
+  chat" webhook routine that bring T3 thread questions to this chat. Use for "phone
+  answers", "tell me when a thread asks something", "update the phone answers routine",
+  and pausing or removing it. A run of the routine itself uses t3-event, not this skill.
 ---
-Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, ListMachines, routines, cards or SendToUser are OpenBot integration; other agents follow t3-tots-rules "OpenBot integration". Its "Decisions" section says who may answer. Phone answers need the token (t3-tots-rules "Token") and tools v1.4.0 or later (t3-install-tools).
+Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). OpenBot uses
+the "OpenBot platform" section and its own routine tools. Its "Decisions"
+section says who may answer. Phone answers need the token (t3-tots-rules
+"Token") and tools v1.4.0 or later (t3-install-tools).
 
 On OpenBot, create or update the webhook routine with OpenBot's routine tools.
 Do not ask the user to paste a webhook key into chat. Keep `t3listen` as the
@@ -103,6 +104,6 @@ One listener can send to several bots. This bot, the main one, gets everything u
 
 ## Status, pause, off
 - `node t3listen status`: autostart, running, how many open questions were sent, and the last log lines (`listen.log` in the tools folder).
-- Approvals: the listener sends them when `listen.json` has `"approvals": true` or the service was installed with `--approvals`, and `node t3listen status` says which. Turn them on only when the user explicitly asks: `node t3listen install --approvals`. `node t3listen install` drops the flag again; if status still says `listen.json`, the user turns it off in that file.
+- Approvals: the listener sends them when `listen.json` has `"approvals": true` or the service was installed with `--approvals`, and `node t3listen status` says which. Turn them on only when the user explicitly asks: `node t3listen install --approvals`. `node t3listen install` drops the flag again; if status still says `listen.json`, tell the user to set `"approvals": false` in that file themselves. Never open it.
 - Pause one computer: `node t3listen uninstall` (keeps `listen.json`). Turn off completely: uninstall on each computer, then with a yes delete `listen.json` there and delete the routine.
 - `listen.log` and `WEBHOOK_REJECTED` include the webhook's reply, with the URL and key redacted. HTTP 401/403 means the routine's key changed, so redo setup step 2. A rate-limit reply (even as HTTP 400, e.g. "Automation run rate limit exceeded") comes from the routine platform. The listener stops posting until the limit lifts and then sends what it kept, so tell the user the question may arrive late. `TOKEN_REJECTED` means reissuing the token (t3-tots-rules "Token"); the listener picks it up within 5 minutes.
