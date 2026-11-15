@@ -28,7 +28,7 @@ Start with [t3-getting-started](skills/t3-getting-started/SKILL.md). Install and
 | `export.js`, `survey.js` | all | Redacted export and activity survey. |
 | `t3ui` + `ui-*.applescript` | macOS | UI fallback if the local API is down (needs Accessibility). |
 | `cleanup/scan.py` | all | Read-only disk-usage scan. |
-| `cleanup/make_report.py`, `report/report.py` | Grok Bot box | HTML cleanup report and briefing. |
+| `cleanup/make_report.py`, `report/report.py` | local tools folder | HTML cleanup report and briefing. |
 | `t3ctl.cmd`, `t3listen.cmd` | Windows | `cmd` wrappers. From PowerShell use `node t3ctl`. |
 
 ## Install
@@ -39,7 +39,7 @@ Install from a release tag, not from `main`. Every file is checked against that 
 
 For a process bridge, pipe one redacted event per line through `node ~/.agents/skills/t3-openbot/openbot-adapter.js`. The adapter emits one OpenBot action per line and performs no network access or credential handling.
 
-**Grok Bot.** Skills are built in. Say "set up T3 Tots". After your yes it installs the tools on each computer. The template card starts as a geometric mark. On first setup the official face from [`assets/avatar.png`](assets/avatar.png) is set at the opening, before install, when that download works.
+**OpenBot.** Say "set up T3 Tots". After your yes it installs the tools and skills on the current computer. OpenBot uses its own cards, routines, memory and file attachments.
 
 **Other agents** (Claude Code, Codex, Cursor, Hermes). Download a release or clone the tag, then install the skills:
 
@@ -182,16 +182,17 @@ node t3listen bot remove site
 - A question's close goes to the bots its opening went to. Events carry `projectId` next to `project`.
 - In `listen.json` this is `"main": { "skip": [...] }` and `"bots": { "<name>": { "url", "headers", "only": [...], "skip": [...] } }`. Each rule is `{ "projects": [{ "id", "title" }], "events": [...] }` with either part optional. A bot gets an event unless it has `only` rules and none matches, or a `skip` rule matches.
 
-## T3's own MCP (optional)
+## T3 route bridge (optional)
 
-T3 Code has its own MCP server, and T3 Tots can use it next to the local tools. Say "connect T3 MCP" to the bot, then in T3 Code press Ctrl/Cmd+K, choose **Use T3 Code in another app (MCP)** and pick Grok Bot.
+T3 Code's MCP routes are translated by `t3-openbot/openbot-adapter.js` into
+allowlisted local `t3ctl` argv. OpenBot inspects and approves writes before
+executing them; no hosted connector or machine-link setup is required.
 
-- **Plain actions go straight through MCP and read no skill:** sending and steering, starting a thread, reading, listing, waiting, stopping, renaming, settling. A short memory note carries the rules for them. They still work when the Grok app on a computer is closed.
+- **Route actions stay behind the adapter:** sending, starting, reading, listing and thread updates are translated to local `t3ctl` commands and retain the same retry and approval rules.
 - **Everything else uses the local tools through its skill:** approvals, "what's waiting", phone answers, reports, limits and resume-at-reset, diffs and files.
 - **One action, one route.** The local tools take over only when it is certain nothing was sent. After a timeout the bot looks first and never repeats a change another way while unsure.
 - **When T3 refuses** a change because of the access level you gave the bot, it tells you why and offers four choices: local tools this once, always local tools on that computer, stop, or how to raise its level. It never works around a refusal on its own, also not while you are away.
-- After starting a thread through MCP the bot runs `t3ctl record --started <id>`, so the thread counts as yours in "what's waiting" and digests.
-- T3 Connect limits how many computers a plan links; any it can't link keep using the local tools. A sign-in lasts 30 days.
+- Route actions do not bypass OpenBot's approval boundary or local thread bookkeeping.
 
 The backup and setup rules are in [t3-routes](skills/t3-routes/SKILL.md). The bot reads it only when a connector call fails or is refused.
 

@@ -5,12 +5,12 @@ description: >-
   Safe / Ask / Never cleanup list and deletes only what the user picks. Use for
   "clean up my mac/pc", "free up space", "what is using my disk", "disk is full".
 ---
-Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, ListMachines, routines, cards or SendToUser are Grok Bot only; other agents follow t3-tots-rules "Grok Bot only". Scanning is read-only. Nothing is deleted, moved, or pruned without the user's explicit pick.
+Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, the current OpenBot computer, routines, cards or openbot.attach_files_to_response are OpenBot platform; other agents follow t3-tots-rules "OpenBot platform". Scanning is read-only. Nothing is deleted, moved, or pruned without the user's explicit pick.
 
 ## 0. Set up
-- Call ListMachines. "my mac" / "my pc" = that one; otherwise every connected computer, in parallel.
+- Call the current OpenBot computer. "my mac" / "my pc" = that one; otherwise every connected computer, in parallel.
 - Tell the user: "Scanning sizes only (no file contents, except hashing big files for duplicates). Nothing is deleted. This takes a few minutes."
-- `scan.py` is `cleanup/scan.py` in the tools folder; if it's missing there, CopyFromBox it from `/workspace/t3-tots-tools/cleanup/scan.py` (run t3-install-tools if that is missing too). Needs Python 3.8+; if absent use the per-OS commands in step 2.
+- `scan.py` is `cleanup/scan.py` in the tools folder; if it's missing there, local file copy it from `<tools folder>/cleanup/scan.py` (run t3-install-tools if that is missing too). Needs Python 3.8+; if absent use the per-OS commands in step 2.
 - Write every scan file and CSV to `out/` in the tools folder (create it if missing), never to the tools folder itself or the home folder.
 - Record **free space before** (step 1 numbers). Keep each Shell call under ~10 min; background long ones and say so.
 - **Other user accounts:** list them; never scan or touch them.
@@ -89,7 +89,7 @@ For every candidate folder, one line with: size, last-modified (newest file), an
 Verdict per item: **safe** (regenerable or pushed duplicate), **probably safe** (scratch with no unique work, glance first), **keep** (in use, unique, dirty/unpushed, personal), with the reason and exact command. Delete still only what the user picks.
 
 ## 7c. Report (always make_report.py)
-Write the plan as `/workspace/t3-out/<machine>-cleanup-plan.json` and build the page on the box: `python3 /workspace/t3-tots-tools/cleanup/make_report.py /workspace/t3-out/<machine>-cleanup-plan.json /workspace/t3-out/<machine>-cleanup-interactive.html` (the schema is in the script's docstring). Never hand-write report HTML.
+Write the plan as `<tools folder>/out/<machine>-cleanup-plan.json` and build the page on the box: `python3 <tools folder>/cleanup/make_report.py <tools folder>/out/<machine>-cleanup-plan.json <tools folder>/out/<machine>-cleanup-interactive.html` (the schema is in the script's docstring). Never hand-write report HTML.
 - Fields for each item: `id` (unique and short, like a1 or dl3), `name`, `path`, `machine`, `size_bytes`, `category` (one section per area), `risk` (`safe` / `probably-safe` / `ask` / `keep`), `confidence` (0 to 100), `what_it_is`, `where_from`, `what_to_know`, `command`, and optionally `action` (delete / prune / move-to-<drive letter> / uninstall / run-as-admin / keep), `status:"done"` for items already cleared, and `drive`. Top level: `title`, `machine`, `date`, `drives[{machine,name,total_bytes,used_bytes}]` and `notes[]`.
 - Write in plain English and keep each field to one line. Use `ask` for anything that might be the only copy or is personal.
 - Check it with headless Chrome (`google-chrome --headless=new --no-sandbox --screenshot=<png> --window-size=1280,2600 file://<html>`), then send the HTML (plus the PNG if it helps).

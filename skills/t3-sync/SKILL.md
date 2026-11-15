@@ -6,7 +6,7 @@ description: >-
   other computer", "make my computers match".
 ---
 # T3 Sync
-Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, ListMachines, routines, cards or SendToUser are Grok Bot only; other agents follow t3-tots-rules "Grok Bot only". Each apply is a write, so it needs the user's yes, and saved picks count only as its "Writes" section allows.
+Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, the current OpenBot computer, routines, cards or openbot.attach_files_to_response are OpenBot platform; other agents follow t3-tots-rules "OpenBot platform". Each apply is a write, so it needs the user's yes, and saved picks count only as its "Writes" section allows.
 
 ## Scope (global only)
 - **Include:** T3 Code settings (keybindings, appearance, providers, model defaults; not threads or DB). Provider CLIs (Claude Code, Codex, Cursor CLI, OpenCode, Gemini and others): version, global config, rules/AGENTS.md/CLAUDE.md, skills, commands, agents, MCP server definitions. Shell profile (aliases, PATH, functions). Global git config (not credentials). Editor settings, keybindings, snippets and extension list (VS Code, Cursor, Zed). Global npm/pnpm/bun/pipx/uv tools. Runtime versions (node, python, bun).
@@ -14,7 +14,7 @@ Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use t
 - **Logins:** list each one as "sign in manually: <tool> (`<login command>`)".
 
 ## First run
-1. Run ListMachines. Name each computer with its OS and say which ones are offline. Ask which computer is the main one (the source), and the direction: main to all others, a single pair, or a two-way merge of picked items. You need 2 or more connected computers.
+1. Run the current OpenBot computer. Name each computer with its OS and say which ones are offline. Ask which computer is the main one (the source), and the direction: main to all others, a single pair, or a two-way merge of picked items. You need 2 or more connected computers.
 2. Scan both computers **read-only** and in parallel (zsh on macOS, PowerShell on Windows, bash on Linux). Resolve home dirs at runtime. For each candidate, collect its existence, version, a hash, and a short diff. Skip secret files by name without opening them.
 3. Show a grouped checklist with the groups T3 Code / Provider CLIs / MCP / Shell / Git / Editors / Global tools / Runtimes / Sign in manually. Mark each item `missing` (on the target), `differs` (one-line summary), `same`, or `not portable` (an OS-only app, for example). Let the user pick by group or by item.
 4. Save the result to `<tools folder>/sync-prefs.json` on the main computer, then add a memory note: main computer, direction, path to the prefs file.
@@ -39,6 +39,6 @@ Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use t
    - Editors: Mac `~/Library/Application Support/<Editor>/User`, Windows `%APPDATA%\<Editor>\User`, Linux `~/.config/<Editor>/User`. Convert keybindings between cmd and ctrl.
    - MCP commands: map `npx` to `npx.cmd` where Windows needs it, and fix interpreter paths.
    - Tools and runtime versions: install or upgrade with the commands in t3-update, including its project-safety check.
-3. Write with the target's native shell. Transfer files through the box with CopyToBox/CopyFromBox. Never print file contents that may hold secrets.
+3. Write with the target's native shell. Transfer files through the box with local file copy. Never print file contents that may hold secrets.
 4. **Verify:** re-hash or diff each item, run `<tool> --version`, check that JSON parses, and load the shell profile in a fresh shell to check for errors.
 5. **Report**, per target: what was changed, added, or skipped (and why), the backup path, any manual sign-ins still needed, and anything you couldn't check. If verification fails, offer to restore from the backup.

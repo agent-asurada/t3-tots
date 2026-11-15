@@ -8,7 +8,13 @@ description: >-
   Not for updating T3 Code or dev tools (t3-update).
 ---
 
-Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, ListMachines, routines, cards or SendToUser are Grok Bot only; other agents follow t3-tots-rules "Grok Bot only". The scripts live in the repo github.com/Deepusleepy/t3-tots (MIT). This skill pins release `v1.5.1` by sha256, so a changed repo can't change what gets installed. Any mismatch installs nothing (`HASH_MISMATCH`). The same release also carries the t3-* skills, each listed with its sha256 in that tag's `manifest.json`; "Update T3 Tots" below brings scripts and live skills to one tag with one yes.
+Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, ListMachines, routines, cards or SendToUser are OpenBot platform; other agents follow t3-tots-rules "OpenBot platform". The scripts live in the repo github.com/Deepusleepy/t3-tots (MIT). This skill pins release `v1.5.1` by sha256, so a changed repo can't change what gets installed. Any mismatch installs nothing (`HASH_MISMATCH`). The same release also carries the t3-* skills, each listed with its sha256 in that tag's `manifest.json`; "Update T3 Tots" below brings scripts and live skills to one tag with one yes.
+
+OpenBot path: run the installer from the current checkout or release folder. Use
+`node tools/t3ctl skills install --to ~/.agents/skills` for skills and the local
+tools folder for helper scripts. The hosted box and multi-computer paragraphs
+below are compatibility notes; OpenBot uses the current computer and its
+`out/` directory.
 
 The box copy needs no approval. Writing to a user's computer needs their yes; the one setup yes in t3-getting-started covers it. If a computer's t3ctl or t3listen hashes differ from the manifest because someone updated them locally ahead of a release, report that and don't install over them until a release pins them. Never touch the `token` file, `listen.json` or the other data files in the tools folder. Skill sync only reads and writes on the box (`/workspace/t3-tots-skill-sync/`) and changes only skills whose id starts with `t3-`; every other skill is left alone.
 
@@ -24,7 +30,7 @@ If it prints `REPO_PRIVATE_OR_MISSING`, the repo is private or the tag doesn't e
   check                     compare with the latest GitHub release (read-only): changed files + notes
   update <tag> [--from DIR] install <tag> on the box, verified against that tag's manifest.json (only after the user's yes)
   skills [tag] [--write [--placeholders]] [--diff ID] [--base TAG] [--base-from DIR] [--from DIR]  compare the tag's skills
-                            (default: latest release) with the live Grok Bot skills: new / changed / placeholder / yours (edited
+                            (default: latest release) with the live OpenBot skills: new / changed / placeholder / yours (edited
                             by the owner, the release didn't change it) / both (edited by the owner and changed by the release,
                             or its history can't be read) / unchanged. --write saves verified copies for UpdateSkill in
                             /workspace/t3-tots-skill-sync/<tag>/ and backs up every live copy it may replace; a "yours" skill is
@@ -45,7 +51,7 @@ If it prints `REPO_PRIVATE_OR_MISSING`, the repo is private or the tag doesn't e
 --from DIR reads the files from a folder on the box (a CopyToBox of the release or a checkout at that tag)
 instead of downloading; the same hashes are checked. --gh makes the install command download with the
 GitHub CLI, which works for a private repo on a computer where `gh auth status` is signed in.
-Installs tools only. Live Grok Bot skills are applied by the main agent with UpdateSkill from `skills --write`;
+Installs tools only. Live OpenBot skills are applied by the main agent with UpdateSkill from `skills --write`;
 other agents install skills with `t3ctl skills install`. The tools folder stays flat: each file
 goes to its manifest `dest` (tools/windows/t3ctl.cmd becomes t3ctl.cmd)."""
 import difflib, hashlib, json, os, pathlib, re, shutil, sys, time, unicodedata, urllib.error, urllib.request
@@ -238,7 +244,7 @@ def rel_skills(tag, src=None):  # the tag's t3-* skills, each verified against t
     return m, rel
 def skills(tag, write=False, show=None, placeholders=False, base=None, base_src=None):
     if not LIVE.is_dir():
-        print(f"skills: no live skills folder at {LIVE} (not Grok Bot). Other agents: node t3ctl skills install --to <dir>"); return
+        print(f"skills: no live skills folder at {LIVE} (not OpenBot). Other agents: node t3ctl skills install --to <dir>"); return
     m, rel = rel_skills(tag, SRC)
     if not rel: print(f"skills: {tag} manifest lists no skills (before v1.4.0) - skill sync skipped"); return
     if IT in rel:
@@ -477,7 +483,7 @@ Files per OS come from `manifest.json` (`targets`; names below are installed nam
 4. Check: `t3q.py health` prints the T3 server state (or `NO_T3_DATA`); `node t3ctl` with no args and `node t3listen help` print usage (or `NODE_TOO_OLD`). Installing the files doesn't start `t3listen`; that's t3-phone-answers, after the user opts in.
 
 ## Skills
-Grok Bot keeps the t3-* skills as live skills; "Update T3 Tots" below keeps them on the same release as the scripts. `python3 /workspace/t3tots_fetch.py skills [tag]` compares them read-only (default tag: latest release). Another agent on a computer (Claude Code, Codex, Cursor and so on) gets them with `node t3ctl skills install --to <its skills folder>`, run from a repo checkout or an unpacked release (see the repo README).
+OpenBot keeps the t3-* skills as live skills; "Update T3 Tots" below keeps them on the same release as the scripts. `python3 /workspace/t3tots_fetch.py skills [tag]` compares them read-only (default tag: latest release). Another agent on a computer (Claude Code, Codex, Cursor and so on) gets them with `node t3ctl skills install --to <its skills folder>`, run from a repo checkout or an unpacked release (see the repo README).
 
 ## README
 Create `README.md` in the tools folder if it's missing (keep the user's edits otherwise). Write it for that computer's OS only: what the folder is (T3 Tots helper scripts from github.com/Deepusleepy/t3-tots), the installed version, token issued yes/no with date and 90-day expiry, how to revoke, and that deleting the folder removes T3 Tots from this computer. On updates, change only the version line.
@@ -495,7 +501,7 @@ Use only when the user asks ("update T3 Tots", "update T3 Tots tools", "update m
    a. Box: `python3 /workspace/t3tots_fetch.py update <tag>` (skip if `VERSION` already says that tag). It verifies against that tag's `manifest.json` and replaces the box manifest.
    b. Computers: for each T3 computer in memory (ListMachines; offline ones are listed and offered later), run "Install on a computer" steps 1 and 2 with its OS and tools folder. Update the version line in its `README.md`. If `node t3listen status` there shows it running, run `node t3listen install` again so it restarts on the new version; add `--approvals` only if status showed "installed with --approvals" before the update (tools before v1.4.1 don't print that line, so use memory or ask). `listen.json` is kept.
    c. Skills: `python3 /workspace/t3tots_fetch.py skills <tag> --write --base <the tag that was installed before step a>`. It downloads each `skills/<id>/SKILL.md` of the tag (or reads it with `--from`), checks its sha256 against the tag's `manifest.json` (any mismatch writes nothing), and fills `/workspace/t3-tots-skill-sync/<tag>/` with `PLAN.json` (apply order, t3-tots-rules first and t3-install-tools last), one `<id>.json` per new or changed skill (`id`, `new` true|false, `name`, `description`, `body` without frontmatter), the full verified `<id>.SKILL.md`, and `t3tots_fetch.py` when t3-install-tools changed.
-   d. Apply: skills under `ask_the_owner` in `PLAN.json` are handled as "Skills you edited" says, after the rest, and skills under `yours_kept` stay as they are. First run `python3 /workspace/t3tots_fetch.py recheck /workspace/t3-tots-skill-sync/<tag>`: it must print `OK`. If it prints `CHANGED <ids>`, those skills were edited after the plan was made: apply none of them and run step c again. Then for each entry of `apply_in_order`, in order, the main Grok Bot agent calls UpdateSkill once with that json's name, description and body (action write; pass id to rewrite an existing skill, omit id to create a new one). Skip skills the user excluded. A subagent can't call UpdateSkill: it stops after step c and hands the main agent the folder path and the plan.
+   d. Apply: skills under `ask_the_owner` in `PLAN.json` are handled as "Skills you edited" says, after the rest, and skills under `yours_kept` stay as they are. First run `python3 /workspace/t3tots_fetch.py recheck /workspace/t3-tots-skill-sync/<tag>`: it must print `OK`. If it prints `CHANGED <ids>`, those skills were edited after the plan was made: apply none of them and run step c again. Then for each entry of `apply_in_order`, in order, the main OpenBot agent calls UpdateSkill once with that json's name, description and body (action write; pass id to rewrite an existing skill, omit id to create a new one). Skip skills the user excluded. A subagent can't call UpdateSkill: it stops after step c and hands the main agent the folder path and the plan.
    e. t3-install-tools goes last. If it is under `ask_the_owner` (the user edited it and hasn't answered yet), skip this step for now: the box tools from step a stay as they are, and this step is done right after their answer. Its prepared body already pins `<tag>` and that tag's tool hashes (the fetcher rewrites `PIN` and `PINNED` from the manifest, and keeps the live body if that release's copy has no skill sync). After its UpdateSkill, copy the folder's `t3tots_fetch.py` over `/workspace/t3tots_fetch.py` (or save the fetcher from the updated skill), then run `python3 /workspace/t3tots_fetch.py box`. It must print `OK <tag>`; a `HASH_MISMATCH` means the pin and the box disagree, so stop and report.
    f. Skills listed under `not_in_release_ask_default_keep`: list them and ask "Delete <ids>?". Default keep; delete only after a separate yes.
    g. Do every check under "After an update" below, reading that section from the skill as it is after step e, not from what you read before the update.
@@ -538,8 +544,7 @@ Some changes live on the bot side, not in the scripts or skills: a routine's pro
 | First save the fetcher from "Box copy" to `/workspace/t3tots_fetch.py` if that file is missing or differs (an older one can't see placeholders). Then: `python3 /workspace/t3tots_fetch.py skills <installed tag>` lists a skill as `placeholder` (the bot template ships short copies that download the full skill from GitHub on every use) | `python3 /workspace/t3tots_fetch.py skills <installed tag> --write --placeholders`, then UpdateSkill for each entry of the `PLAN.json` in the folder it prints (`<tag>-placeholders`), in order, t3-install-tools last ("Update T3 Tots" step 3d and 3e). Then run the check again: it must list no placeholder. It needs no yes, since these are the user's own T3 Tots skills in their skill library, and a skill edited by hand is never touched. A `both` line in this pass is not handled here: it waits for the next full update check ("Skills you edited"). One line to the user: "Saved the full copies of N skills." |
 | Phone answers are on (memory, or a routine named **T3 questions to chat** exists) and that routine's prompt doesn't start with "T3 Tots event routine v2." | Replace the prompt with the text under t3-phone-answers "Routine prompt" (UpdateRoutine; the webhook URL and key stay, nothing is pasted again). Do the same for any other bot's event routine you can change. Tell the user in one line: each notification now reads far less |
 | A watch routine's prompt starts with "Watch " and not with "T3 Tots watch routine v2." | Replace it with the text under t3-watch "Routine prompt", keeping its target, computer, mode and check (UpdateRoutine). A run where nothing changed then reads no skill |
-| Grok Bot, with no "T3 routes" note and no "T3 Tots MCP offered" note in memory. Not during first setup: t3-getting-started makes this offer itself in section 5b, after its questions | Offer T3's own MCP once, as t3-getting-started "5b. Optional: T3's own MCP" says, and save that note. In a routine run, hand the offer to the main chat |
-| Memory has a "T3 routes" note that doesn't start with "T3 routes v2" | Rewrite it as t3-routes "The note" says, keeping its computers, levels, dates, any saved refusal choice ("use the local tools") and any thread ids still to record |
+| An upstream T3 route arrives without the OpenBot adapter | Route it through `t3-openbot/openbot-adapter.js`; unsupported routes stop with no command |
 
 A check you can't carry out (no access to that routine, the user said no): say so in the finish line and leave the memory note at the older tag, so it is tried again.
 

@@ -6,7 +6,7 @@ description: >-
   send it here", "get me the file from <thread>", "send me what <thread> made",
   "diff of <thread>".
 ---
-Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, ListMachines, routines, cards or SendToUser are Grok Bot only; other agents follow t3-tots-rules "Grok Bot only". Send only the prompt the user asked for.
+Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use the box, the current OpenBot computer, routines, cards or openbot.attach_files_to_response are OpenBot platform; other agents follow t3-tots-rules "OpenBot platform". Send only the prompt the user asked for.
 
 ## 1. Make it (skip when fetching)
 1. Resolve the computer, project and model as in t3-new-thread. Throwaway asks go to the user's sandbox project, from memory (ask once and save it if unknown), with `--model haiku --effort low`.
@@ -18,9 +18,9 @@ Follow the t3-tots-rules skill (skills/t3-tots-rules/SKILL.md). Steps that use t
 - A file that only changed while the run was going, with nothing showing this thread made it, is also listed as not copied, because another session may have made it. So is a hard link, because its content may live outside the project. Show those to the user and copy only the ones they pick: `t3ctl files --thread '<t>' --include '<path>[,<path>]'`.
 - Files outside the project appear only if a reply names them. Take the path from `t3ctl read`.
 - `t3ctl diff --thread '<t>'` gives the diff in a git project.
-- For videos and other files already on the computer, CopyToBox them directly.
+- For videos and other files already on the computer, local file copy them directly.
 
 ## 3. Send
-1. CopyToBox to `/workspace/t3-out/<name>`.
-2. For HTML or SVG, make a preview: `google-chrome --headless=new --no-sandbox --disable-gpu --window-size=1000,700 --virtual-time-budget=1500 --screenshot=/workspace/t3-out/<name>.png file:///workspace/t3-out/<name>.html`.
-3. SendToUser the files and the preview, then one line: the thread, the model, and the path on their computer.
+1. local file copy to `<tools folder>/out/<name>`.
+2. For HTML or SVG, make a preview: `google-chrome --headless=new --no-sandbox --disable-gpu --window-size=1000,700 --virtual-time-budget=1500 --screenshot=<tools folder>/out/<name>.png file://<tools folder>/out/<name>.html`.
+3. openbot.attach_files_to_response the files and the preview, then one line: the thread, the model, and the path on their computer.

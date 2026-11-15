@@ -30,7 +30,7 @@ A choice you put to the user yourself also goes on a card, never in prose.
 
 ## Commands
 Run on the current OpenBot computer from its tools folder (in memory; else `~/t3-tots`). Use `node t3ctl`, single-quote every value, and pass ids in full. A `'` inside a value: write `'\''` in zsh or bash, and `''` in Windows PowerShell.
-- That computer can't run commands now (its Grok app is off) and memory has a "T3 routes" note with a connector for it: answer a **question** through that connector with `t3_pending_request` (`respond` with the user's exact picks, then `read` to see it closed; its close event then says `answeredHere` false, so send nothing for that one). Never an approval or a decline that way: tell the user to handle it in T3 Code.
+- If the current computer cannot run commands, stop and report the local-tools blocker. Never send an approval or decline through an unverified route.
 - One question: `node t3ctl answer --thread '<threadId>' --request '<requestId>' --pick '<exact label>'`, or `--text '<their words>'` for a typed answer.
 - Several questions, or multi-select: one call with `--answers '{"<question id>": "<label>", "<id>": ["<label>", "<label>"], "<id>": "<their words>"}'`.
 - An approval: add the `--decision` flags above to `node t3ctl answer --thread '<threadId>'`.
